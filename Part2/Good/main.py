@@ -1,0 +1,52 @@
+import sys
+import random
+from PyQt6.QtWidgets import QApplication, QMainWindow, QMessageBox
+from PyQt6.QtCore import Qt
+from PyQt6.QtGui import QIntValidator
+from part2good import Ui_MainWindow
+
+class MainWindow(QMainWindow, Ui_MainWindow):
+    def __init__(self):
+        super().__init__()
+        self.setupUi(self)
+        validator = QIntValidator(6,24)
+        self.setWindowTitle("Password Generator")
+        self.characterLineEdit.setValidator(validator)
+        self.generateButton.clicked.connect(self.generateButtonPressed)
+    
+    #create input validation error message popup
+    def create_error_message(self, message):
+        msg = QMessageBox(self)
+        msg.setIcon(QMessageBox.Icon.Critical)
+        msg.setWindowTitle("Error")
+        msg.setText("An error occurred!")
+        msg.setInformativeText(message)
+        msg.exec()
+
+    #lets the user use either the enter button or the enter key
+    def generateButtonPressed(self):
+        self.handle_enter()
+
+    def keyPressEvent(self, event):
+        if event.key() in (Qt.Key.Key_Return, Qt.Key.Key_Enter):
+            self.handle_enter()
+
+    def handle_enter(self):
+        try:
+            self.resultLabel.setText(f"Your New Password: {self.generate_password(int(self.characterLineEdit.text()))}")
+        except ValueError:
+            self.create_error_message("Password length field cannot be empty")
+
+    #password gen, iterates 'length' amount of times and appends a random character
+    def generate_password(self, length):
+        password = ""
+        for i in range(length):
+            password += random.choice('abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890!@#$%^&*()-_=+[]{}|;:,.<>?/~')
+        return password
+
+
+if __name__ == "__main__":
+    app = QApplication(sys.argv)
+    window = MainWindow()
+    window.show()
+    sys.exit(app.exec())
